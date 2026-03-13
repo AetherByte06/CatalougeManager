@@ -30,4 +30,9 @@ public class Equipment {
     public boolean getAvailability(){
         return this.isAvailable;
     }
+    public String getInformation(){
+        return "Name: " + itemName + ", Manufacturer: " + manufacturer + ", Date of Acquisition: "
+                + dateOfAcquisition + ", Type of Equipment: " + type +
+                ", Available?: " + isAvailable;
+    }
 }
