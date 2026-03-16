@@ -35,4 +35,7 @@ public class Equipment {
                 + dateOfAcquisition + ", Type of Equipment: " + type +
                 ", Available?: " + isAvailable;
     }
+    public void setAvailability(boolean available){
+        this.isAvailable = available;
+    }
 }
