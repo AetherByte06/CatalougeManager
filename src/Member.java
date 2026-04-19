@@ -13,4 +13,7 @@ public class Member {
     public String getMemberID() { return this.memberID; }
     public String getName() { return this.name; }
     public String getContactNumber(){ return this.contactNumber; }
+    public void setMemberID(String memberID) { this.memberID = memberID; }
+    public void setName(String name) { this.name = name; }
+    public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
 }

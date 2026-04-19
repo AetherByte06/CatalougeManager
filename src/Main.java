@@ -26,9 +26,9 @@ void main() throws InterruptedException {
         // Main menu.
         System.out.println("What would you like to do?");
         Scanner sc = new Scanner(System.in);
-        System.out.println("1. Add new equipment \n2. Add new member \n3. Checkout equipment \n4. Return equipment \n5. Calculate previous overdraft\n6. Exit");
+        System.out.println("1. Add new equipment \n2. Add new member \n3. Edit member \n4. Delete member\n5. Checkout equipment \n6. Return equipment \n7. Calculate previous overdraft\n8. Exit");
         int option = Integer.parseInt(sc.nextLine());
-        if (option > 6 || option < 1){
+        if (option > 8 || option < 1){
             System.out.println("Not an option. Please try again.");
         }
         else {
@@ -40,6 +40,75 @@ void main() throws InterruptedException {
                     addMember(memberList);
                     break;
                 case 3:
+                    if (memberList.isEmpty()) {
+                        System.out.println("There are no members to edit, please add a member before trying to edit.");
+                        Thread.sleep(1000);
+                        break;
+                    }
+                    System.out.println("Which member do you want to edit?: ");
+                    for (Member member : memberList) {
+                        System.out.println(member.getName());
+                    }
+                    Scanner s = new Scanner(System.in);
+                    String name = s.nextLine();
+
+                    Member selectedMember = null;
+                    for (Member member : memberList) {
+                        if (Objects.equals(member.getName(), name)) {
+                            selectedMember = member;
+                            break;
+                        }
+                    }
+                    if (selectedMember == null) {
+                        System.out.println("Member not found, please try again.");
+                        Thread.sleep(1000);
+                        break;
+                    }
+
+                    System.out.println("What do you want to edit about this member? \n1. Name \n2. ID \n3. Contact Number");
+                    int choice = Integer.parseInt(sc.nextLine());
+                    switch (choice) {
+                        case 1:
+                            System.out.println("Enter new name: ");
+                            String newName = s.nextLine();
+                            selectedMember.setName(newName);
+                            break;
+                        case 2:
+                            System.out.println("Enter new ID: ");
+                            String newID = s.nextLine();
+                            selectedMember.setMemberID(newID);
+                            break;
+                        case 3:
+                            System.out.println("Enter new contact number: ");
+                            String newContactNumber = s.nextLine();
+                            selectedMember.setContactNumber(newContactNumber);
+                            break;
+                        default:
+                            break;
+                    }
+                case 4:
+                    System.out.println("Enter members name to delete: ");
+                    Scanner scanner = new Scanner(System.in);
+                    String nameToDelete = scanner.nextLine();
+
+                    Member memberToDelete = null;
+                    for (Member member : memberList) {
+                        if (Objects.equals(member.getName(), nameToDelete)) {
+                            memberToDelete = member;
+                            break;
+                        }
+                    }
+                    if (memberToDelete == null) {
+                        System.out.println("Member not found, please try again.");
+                        Thread.sleep(1000);
+                        break;
+                    }
+
+                    memberList.remove(memberToDelete);
+                    System.out.println("Member deleted.");
+                    Thread.sleep(1000);
+                    break;
+                case 5:
                     System.out.println("Which member is checking out equipment?:");
                     // add member names to an arraylist, index of name will be the same as the index of the member chosen.
                     for (Member m : memberList){
@@ -61,13 +130,13 @@ void main() throws InterruptedException {
 
                     checkoutEquipment(borrowedList, equipmentList, member);
                     break;
-                case 4:
+                case 6:
                     returnEquipment(borrowedList, equipmentList, previousBorrowedList);
                     break;
-                case 5:
+                case 7:
                     System.out.println("Which instance do you want to calculate overdraft for?:");
-                    Scanner s = new Scanner(System.in);
-                    String instance = s.nextLine();
+                    Scanner sca = new Scanner(System.in);
+                    String instance = sca.nextLine();
                     for (BorrowedEquipment b : previousBorrowedList){
                         if (Objects.equals(b.getEquipment().getItemName(), instance)){
                             calculateOverdraft(previousBorrowedList, b.getEquipment());
@@ -79,7 +148,7 @@ void main() throws InterruptedException {
                         }
                     }
                     break;
-                case 6:
+                case 8:
                     System.out.println("Thanks for using the program!");
                     end = true;
                     break;
