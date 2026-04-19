@@ -1,13 +1,13 @@
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Equipment {
     private String itemName;
     private String manufacturer;
-    private String dateOfAcquisition;
+    private LocalDate dateOfAcquisition;
     private String type;
     private boolean isAvailable;
 
-    public Equipment(String itemName, String manufacturer, String dateOfAcquisition, String type, boolean isAvailable) {
+    public Equipment(String itemName, String manufacturer, LocalDate dateOfAcquisition, String type, boolean isAvailable) {
         this.itemName = itemName;
         this.manufacturer = manufacturer;
         this.dateOfAcquisition = dateOfAcquisition;
@@ -21,7 +21,7 @@ public class Equipment {
     public String getManufacturer(){
         return this.manufacturer;
     }
-    public String getDateOfAcquisition(){
+    public LocalDate getDateOfAcquisition(){
         return this.dateOfAcquisition;
     }
     public String getType(){

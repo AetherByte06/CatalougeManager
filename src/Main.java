@@ -1,4 +1,8 @@
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.time.temporal.ChronoUnit;
 
 /* ALL CODE (if not all, most) WILL THROW InterruptedException(s), THIS IS DUE TO THE FACT I AM USING
 THE Thread.sleep() METHOD, WHICH ALLOWS FOR BREAKS IN THE PROGRAM.
@@ -10,6 +14,7 @@ void main() throws InterruptedException {
     ArrayList<Member> memberList = new ArrayList<>();
     ArrayList<BorrowedEquipment> borrowedList = new ArrayList<>();
     ArrayList<String> memberNames = new ArrayList<>();
+    ArrayList<BorrowedEquipment> previousBorrowedList = new ArrayList<>();
     boolean end = false;
 
 
@@ -18,11 +23,12 @@ void main() throws InterruptedException {
 
 
     do{
+        // Main menu.
         System.out.println("What would you like to do?");
         Scanner sc = new Scanner(System.in);
-        System.out.println("1. Add new equipment \n2. Add new member \n3. Checkout equipment \n4. Calculate overdraft \n5. Exit");
+        System.out.println("1. Add new equipment \n2. Add new member \n3. Checkout equipment \n4. Return equipment \n5. Calculate previous overdraft\n6. Exit");
         int option = Integer.parseInt(sc.nextLine());
-        if (option > 5 || option < 1){
+        if (option > 6 || option < 1){
             System.out.println("Not an option. Please try again.");
         }
         else {
@@ -36,12 +42,19 @@ void main() throws InterruptedException {
                 case 3:
                     System.out.println("Which member is checking out equipment?:");
                     // add member names to an arraylist, index of name will be the same as the index of the member chosen.
-                    for (Member m  :memberList){
+                    for (Member m : memberList){
                         memberNames.add(m.getName());
                         System.out.println(m.getName());
                     }
                     // searching the member name list for the index of the member name.
                     String memberName = sc.nextLine();
+
+                    if (!memberNames.contains(memberName)){
+                        System.out.println("Member does not exist, have you added this member? Please try again.");
+                        Thread.sleep(2000);
+                        break;
+                }
+
                     int memberIndex = memberNames.indexOf(memberName);
                     // finding the member that is trying to borrow.
                     Member member = memberList.get(memberIndex);
@@ -49,14 +62,28 @@ void main() throws InterruptedException {
                     checkoutEquipment(borrowedList, equipmentList, member);
                     break;
                 case 4:
-                    //calculateOverdraftFee(borrowedList);
-                    //break;
+                    returnEquipment(borrowedList, equipmentList, previousBorrowedList);
+                    break;
                 case 5:
+                    System.out.println("Which instance do you want to calculate overdraft for?:");
+                    Scanner s = new Scanner(System.in);
+                    String instance = s.nextLine();
+                    for (BorrowedEquipment b : previousBorrowedList){
+                        if (Objects.equals(b.getEquipment().getItemName(), instance)){
+                            calculateOverdraft(previousBorrowedList, b.getEquipment());
+                        }
+                        else{
+                            System.out.println("Instance does not exist, please try again.");
+                            Thread.sleep(1000);
+                            break;
+                        }
+                    }
+                    break;
+                case 6:
                     System.out.println("Thanks for using the program!");
                     end = true;
                     break;
                 default:
-                    System.out.println("balls");
                     break;
             }
         }
@@ -66,27 +93,24 @@ void main() throws InterruptedException {
 /**
  * Used to add equipment to the program.
  * Gets added to the equipmentList.
- * @param equipment
- * @throws InterruptedException
+ * @param equipment Equipment object.
+ * @throws InterruptedException If the thread gets interrupted, this will get thrown.
  */
 
 public void addEquipment(ArrayList<Equipment> equipment) throws InterruptedException {
+    LocalDate date = LocalDate.now();
     Scanner scanner = new Scanner(System.in);
     System.out.print("Enter the name of the equipment: ");
     String name = scanner.nextLine();
     System.out.print("Enter the manufacturer of the equipment: ");
     String manufacturer = scanner.nextLine();
 
-    // TODO: Find possible error checking method for this.
-    System.out.print("Enter the date that the equipment was acquired on (dd/mm/yyyy): ");
-    String dateOfAcquisition = scanner.nextLine();
-
     System.out.print("Enter the type of the equipment: ");
     String type = scanner.nextLine();
     System.out.print("Is the equipment available for use? (true/false): ");
     boolean available = scanner.nextBoolean();
 
-    Equipment e = new Equipment(name, manufacturer, dateOfAcquisition, type, available);
+    Equipment e = new Equipment(name, manufacturer, date, type, available);
     equipment.add(e);
     System.out.println("Equipment added.");
     Thread.sleep(1000);
@@ -94,8 +118,8 @@ public void addEquipment(ArrayList<Equipment> equipment) throws InterruptedExcep
 
 /**
  * Adds a member to the memberList.
- * @param members
- * @throws InterruptedException
+ * @param members List of members.
+ * @throws InterruptedException If the thread gets interrupted, this will get thrown.
  */
 public void addMember(ArrayList<Member> members) throws InterruptedException {
     boolean end = false;
@@ -125,13 +149,14 @@ public void addMember(ArrayList<Member> members) throws InterruptedException {
 
 /**
  * Takes equipment that a member wants to borrow, assigns them a due date, return date and a borrowed date.
- * Actually attaches the member that has borrowed it.
- * @param borrowedEquipments
- * @param equipment
- * @param borrower
- * @throws InterruptedException
+ * Also attaches the member that has borrowed it.
+ * @param borrowedEquipments List of borrowed equipments.
+ * @param equipment List of equipment that can be borrowed.
+ * @param borrower Member who has borrowed the equipment.
+ * @throws InterruptedException If the thread gets interrupted, this will get thrown.
  */
 public void checkoutEquipment(ArrayList<BorrowedEquipment> borrowedEquipments, ArrayList<Equipment> equipment, Member borrower) throws InterruptedException{
+    LocalDate date = LocalDate.now();
     if (!equipment.isEmpty()){
         System.out.println("Equipment List: ");
         for (Equipment e : equipment){
@@ -140,12 +165,12 @@ public void checkoutEquipment(ArrayList<BorrowedEquipment> borrowedEquipments, A
         Scanner sc = new Scanner(System.in);
         boolean valid = false;
         while (!valid) {
-            System.out.print("Enter the name of the equipment you wish to borrow (type exit to stop): ");
-            // using object.equals to prevent null errors.
-            if (Objects.equals(sc.nextLine(), "exit")) {
+            System.out.println("Enter the name of the equipment you wish to borrow (type exit to stop): ");
+            String itemToBorrow = sc.nextLine();
+            // Using Objects.equals to account for possible null entries.
+            if (Objects.equals(itemToBorrow, "exit")){
                 break;
             }
-            String itemToBorrow = sc.nextLine();
             int count = 0;
             for (Equipment e : equipment) {
                 if (count < equipment.size()) {
@@ -153,13 +178,22 @@ public void checkoutEquipment(ArrayList<BorrowedEquipment> borrowedEquipments, A
                         count++;
                     } else {
                         if (e.getAvailability()) {
-                            // Filled with test data for now, make sure to allocate this dynamically using something like DateTime.
-                            // dk how that will work but it might function
-                            borrowedEquipments.add(new BorrowedEquipment(e, "2/2/23", "2/3/23", "2/3/23", borrower));
+
+                            /* The user can input how many days the equipment will be used for, and edits the due date
+                            to match this input.
+                             */
+
+                            System.out.println("How many days is this equipment going to be used for?");
+                            int numberOfDays = Integer.parseInt(sc.nextLine());
+                            // DateReturned will be edited in the borrowedEquipment list.
+                            borrowedEquipments.add(new BorrowedEquipment(e, date, date.plusDays(numberOfDays), null, borrower));
                             e.setAvailability(false);
+                            System.out.println("Equipment has been borrowed.");
+                            Thread.sleep(2000);
                             valid = true;
                         } else {
                             System.out.println("Equipment is not available to borrow.");
+                            Thread.sleep(1000);
                         }
                     }
                 } else {
@@ -173,4 +207,86 @@ public void checkoutEquipment(ArrayList<BorrowedEquipment> borrowedEquipments, A
         System.out.println("There is no equipment in the list, please add an equipment.");
         Thread.sleep(1000);
     }
+}
+
+/**
+ * Takes the equipment that a member wants to return, and edits the equipment list to reflect the item has been returned.
+ * @param borrowedEquipments List of borrowed equipment.
+ * @param equipment List of equipment.
+ * @param previousBorrowedList List of previously borrowed equipment, used to calculate overdraft fees.
+ * @throws InterruptedException If the thread gets interrupted, this will get thrown.
+ */
+public void returnEquipment(ArrayList<BorrowedEquipment> borrowedEquipments, ArrayList<Equipment> equipment, ArrayList<BorrowedEquipment> previousBorrowedList) throws InterruptedException {
+    LocalDate date = LocalDate.now();
+    if (!borrowedEquipments.isEmpty()){
+        System.out.println("Equipment List: ");
+        for (BorrowedEquipment e : borrowedEquipments){
+            System.out.println(e.getEquipment().getItemName());
+        }
+        Scanner sc = new Scanner(System.in);
+        boolean valid = false;
+        while (!valid) {
+            System.out.println("Enter the name of the equipment you wish to return (type exit to stop): ");
+            String itemToReturn = sc.nextLine();
+            if (Objects.equals(itemToReturn, "exit")){
+                break;
+            }
+            else {
+                boolean found = false;
+                for (BorrowedEquipment be : borrowedEquipments) {
+                    if (Objects.equals(be.getEquipment().getItemName(), itemToReturn)) {
+                        if (equipment.contains(be.getEquipment())) {
+                            System.out.println("Equipment has been returned.");
+                            // finds the same equipment in the equipments list and sets its availability to true;
+                            for (Equipment eq : equipment) {
+                                if (Objects.equals(eq.getItemName(), itemToReturn)) {
+                                    eq.setAvailability(true);
+                                    break;
+                                }
+                            }
+                            be.setDateReturned(date);
+                            previousBorrowedList.add(be);
+                            borrowedEquipments.remove(be);
+                            calculateOverdraft(previousBorrowedList, be.getEquipment());
+                            Thread.sleep(2000);
+                            valid = true;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    System.out.println("Equipment does not exist in borrowed list, please try again.");
+                    Thread.sleep(1000);
+                }
+            }
+        }
+    }
+    else{
+        System.out.println("There is no borrowed equipment in the list, please borrow an equipment before returning it.");
+        Thread.sleep(1000);
+    }
+}
+
+/**
+ * Calculates the fixed overdraft fee if the item is returned late.
+ * @param previousBorrowedEquipments List of previously borrowed equipments, used to get the due and return dates.
+ * @param e Equipment being returned, used to find the correct borrowed equipment in the previousBorrowedEquipments list.
+ */
+public void calculateOverdraft(ArrayList<BorrowedEquipment> previousBorrowedEquipments, Equipment e) {
+    for (BorrowedEquipment be : previousBorrowedEquipments) {
+        if (Objects.equals(be.getEquipment().getItemName(), e.getItemName())){
+            if (be.getDueDate().isAfter(be.getDateReturned()) || be.getDueDate().isEqual(be.getDateReturned())){
+                System.out.println("Equipment has been returned on time. No overdraft fee is required.");
+            }
+            else{
+                long daysLate = ChronoUnit.DAYS.between(be.getDueDate(), be.getDateReturned());
+                double fee = daysLate * 5.0;
+                System.out.println("Equipment is overdue by " + daysLate + " days.");
+                System.out.println("Overdraft fee is £" + fee);
+            }
+        }
+    }
+
+
 }
