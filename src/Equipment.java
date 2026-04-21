@@ -38,4 +38,7 @@ public class Equipment {
     public void setAvailability(boolean available){
         this.isAvailable = available;
     }
+    public void setItemName(String itemName){ this.itemName = itemName; }
+    public void setManufacturer(String manufacturer){ this.manufacturer = manufacturer; }
+    public void setType(String type){ this.type = type; }
 }

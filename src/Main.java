@@ -22,24 +22,100 @@ void main() throws InterruptedException {
     Thread.sleep(2000);
 
 
-    do{
+    do {
         // Main menu.
         System.out.println("What would you like to do?");
         Scanner sc = new Scanner(System.in);
-        System.out.println("1. Add new equipment \n2. Add new member \n3. Edit member \n4. Delete member\n5. Checkout equipment \n6. Return equipment \n7. Calculate previous overdraft\n8. Exit");
-        int option = Integer.parseInt(sc.nextLine());
-        if (option > 8 || option < 1){
-            System.out.println("Not an option. Please try again.");
+        System.out.println("1. Add new equipment \n2. Edit equipment \n3. Delete equipment \n4. Add new member \n5. Edit member \n6. Delete member\n7. Checkout equipment \n8. Return equipment \n9. Calculate previous overdraft\n10. Exit");
+        int option = 0;
+        try {
+            option = Integer.parseInt(sc.nextLine());
+        } catch (NumberFormatException nfe) {
+            System.out.println("Please enter a number between 1 and 10.");
         }
-        else {
+        if (option > 10 || option < 1) {
+            System.out.println("Not an option. Please try again.");
+        } else {
             switch (option) {
                 case 1:
                     addEquipment(equipmentList);
                     break;
                 case 2:
-                    addMember(memberList);
+                    System.out.println("What equipment would you like to edit?");
+                    for (Equipment e : equipmentList) {
+                        System.out.println(e.getItemName());
+                    }
+                    Scanner sc2 =  new Scanner(System.in);
+                    String equipmentName = sc2.nextLine();
+
+                    Equipment selectedEquipment = null;
+                    for (Equipment equipment : equipmentList) {
+                        if (Objects.equals(equipment.getItemName(), equipmentName)) {
+                            selectedEquipment = equipment;
+                            break;
+                        }
+                    }
+
+                    if (selectedEquipment == null) {
+                        System.out.println("Equipment not found, please try again.");
+                        Thread.sleep(1000);
+                        break;
+                    }
+
+                    System.out.println("What aspect would you like to edit? \n1. Name \n2. Manufacturer \n3. Type");
+                    int editOption = Integer.parseInt(sc.nextLine());
+                    switch (editOption) {
+                        case 1:
+                            System.out.println("Enter new name: ");
+                            String newName = sc2.nextLine();
+                            selectedEquipment.setItemName(newName);
+                            System.out.println("Name updated.");
+                            Thread.sleep(1000);
+                            break;
+                        case 2:
+                            System.out.println("Enter new manufacturer: ");
+                            String newManufacturer = sc2.nextLine();
+                            selectedEquipment.setManufacturer(newManufacturer);
+                            System.out.println("Manufacturer updated.");
+                            Thread.sleep(1000);
+                            break;
+                        case 3:
+                                System.out.println("Enter new type: ");
+                                String newType = sc2.nextLine();
+                                selectedEquipment.setType(newType);
+                                System.out.println("Type updated.");
+                                Thread.sleep(1000);
+                                break;
+                    }
                     break;
                 case 3:
+                    System.out.println("Enter equipment name to delete: ");
+                    for (Equipment e : equipmentList) {
+                        System.out.println(e.getItemName());
+                    }
+                    String name = sc.nextLine();
+                    Equipment equipmentToDelete = null;
+                    for (Equipment equipment : equipmentList) {
+                        if (Objects.equals(equipment.getItemName(), name)) {
+                            equipmentToDelete = equipment;
+                            break;
+                        }
+                    }
+
+                    if (equipmentToDelete == null) {
+                        System.out.println("Equipment not found, please try again.");
+                        Thread.sleep(1000);
+                        break;
+                    }
+                    equipmentList.remove(equipmentToDelete);
+                    System.out.println("Equipment deleted.");
+                    Thread.sleep(1000);
+                    break;
+
+                case 4:
+                    addMember(memberList);
+                    break;
+                case 5:
                     if (memberList.isEmpty()) {
                         System.out.println("There are no members to edit, please add a member before trying to edit.");
                         Thread.sleep(1000);
@@ -50,11 +126,11 @@ void main() throws InterruptedException {
                         System.out.println(member.getName());
                     }
                     Scanner s = new Scanner(System.in);
-                    String name = s.nextLine();
+                    String nameOfMember = s.nextLine();
 
                     Member selectedMember = null;
                     for (Member member : memberList) {
-                        if (Objects.equals(member.getName(), name)) {
+                        if (Objects.equals(member.getName(), nameOfMember)) {
                             selectedMember = member;
                             break;
                         }
@@ -72,24 +148,34 @@ void main() throws InterruptedException {
                             System.out.println("Enter new name: ");
                             String newName = s.nextLine();
                             selectedMember.setName(newName);
+                            System.out.println("Name updated.");
+                            Thread.sleep(1000);
                             break;
                         case 2:
                             System.out.println("Enter new ID: ");
                             String newID = s.nextLine();
                             selectedMember.setMemberID(newID);
+                            System.out.println("ID updated.");
+                            Thread.sleep(1000);
                             break;
                         case 3:
                             System.out.println("Enter new contact number: ");
                             String newContactNumber = s.nextLine();
                             selectedMember.setContactNumber(newContactNumber);
+                            System.out.println("ID updated.");
+                            Thread.sleep(1000);
                             break;
                         default:
                             break;
                     }
-                case 4:
+                    break;
+                case 6:
                     System.out.println("Enter members name to delete: ");
-                    Scanner scanner = new Scanner(System.in);
-                    String nameToDelete = scanner.nextLine();
+                    for (Member member : memberList) {
+                        System.out.println(member.getName());
+                    }
+                    Scanner sc3 = new Scanner(System.in);
+                    String nameToDelete = sc3.nextLine();
 
                     Member memberToDelete = null;
                     for (Member member : memberList) {
@@ -108,21 +194,21 @@ void main() throws InterruptedException {
                     System.out.println("Member deleted.");
                     Thread.sleep(1000);
                     break;
-                case 5:
+                case 7:
                     System.out.println("Which member is checking out equipment?:");
                     // add member names to an arraylist, index of name will be the same as the index of the member chosen.
-                    for (Member m : memberList){
+                    for (Member m : memberList) {
                         memberNames.add(m.getName());
                         System.out.println(m.getName());
                     }
                     // searching the member name list for the index of the member name.
                     String memberName = sc.nextLine();
 
-                    if (!memberNames.contains(memberName)){
+                    if (!memberNames.contains(memberName)) {
                         System.out.println("Member does not exist, have you added this member? Please try again.");
                         Thread.sleep(2000);
                         break;
-                }
+                    }
 
                     int memberIndex = memberNames.indexOf(memberName);
                     // finding the member that is trying to borrow.
@@ -130,29 +216,33 @@ void main() throws InterruptedException {
 
                     checkoutEquipment(borrowedList, equipmentList, member);
                     break;
-                case 6:
+                case 8:
                     returnEquipment(borrowedList, equipmentList, previousBorrowedList);
                     break;
-                case 7:
+                case 9:
                     System.out.println("Which instance do you want to calculate overdraft for?:");
+                    System.out.println("Previous borrowed equipment list: ");
+                    for (BorrowedEquipment borrow : previousBorrowedList) {
+                        System.out.println(borrow.getEquipment().getItemName());
+                    }
                     Scanner sca = new Scanner(System.in);
                     String instance = sca.nextLine();
-                    for (BorrowedEquipment b : previousBorrowedList){
-                        if (Objects.equals(b.getEquipment().getItemName(), instance)){
+                    for (BorrowedEquipment b : previousBorrowedList) {
+                        if (Objects.equals(b.getEquipment().getItemName(), instance)) {
                             calculateOverdraft(previousBorrowedList, b.getEquipment());
-                        }
-                        else{
+                        } else {
                             System.out.println("Instance does not exist, please try again.");
                             Thread.sleep(1000);
                             break;
                         }
                     }
                     break;
-                case 8:
+                case 10:
                     System.out.println("Thanks for using the program!");
                     end = true;
                     break;
                 default:
+                    System.out.println("Invalid choice.");
                     break;
             }
         }
@@ -167,6 +257,7 @@ void main() throws InterruptedException {
  */
 
 public void addEquipment(ArrayList<Equipment> equipment) throws InterruptedException {
+
     LocalDate date = LocalDate.now();
     Scanner scanner = new Scanner(System.in);
     System.out.print("Enter the name of the equipment: ");
@@ -177,12 +268,21 @@ public void addEquipment(ArrayList<Equipment> equipment) throws InterruptedExcep
     System.out.print("Enter the type of the equipment: ");
     String type = scanner.nextLine();
     System.out.print("Is the equipment available for use? (true/false): ");
-    boolean available = scanner.nextBoolean();
+    boolean available = Boolean.parseBoolean(scanner.nextLine());
+
+
 
     Equipment e = new Equipment(name, manufacturer, date, type, available);
-    equipment.add(e);
-    System.out.println("Equipment added.");
-    Thread.sleep(1000);
+    if (equipment.contains(e)) {
+        System.out.println("Equipment already exists.");
+        Thread.sleep(1000);
+        return;
+    }
+    else{
+        equipment.add(e);
+        System.out.println("Equipment added.");
+        Thread.sleep(1000);
+    }
 }
 
 /**
@@ -211,9 +311,18 @@ public void addMember(ArrayList<Member> members) throws InterruptedException {
     String contactNumber = scanner.nextLine();
 
     Member m = new Member(name, memberID, contactNumber);
-    members.add(m);
-    System.out.println("Member added.");
-    Thread.sleep(1000);
+
+    if (members.contains(m)) {
+        System.out.println("Member already exists.");
+        Thread.sleep(1000);
+        return;
+    }
+    else{
+        members.add(m);
+        System.out.println("Member added.");
+        Thread.sleep(1000);
+    }
+
 }
 
 /**
